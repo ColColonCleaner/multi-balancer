@@ -1807,9 +1807,7 @@ public List<CPluginVariable> GetDisplayPluginVariables() {
         
         lstReturn.Add(new CPluginVariable("1 - Settings|Enable In-Game Commands", EnableInGameCommands.GetType(), EnableInGameCommands));
 
-        if (EnableRiskyFeatures || fRevealSettings) {
-            lstReturn.Add(new CPluginVariable("1 - Settings|Enable Ticket Loss Rate Logging", EnableTicketLossRateLogging.GetType(), EnableTicketLossRateLogging));
-        }
+		lstReturn.Add(new CPluginVariable("1 - Settings|Enable Ticket Loss Rate Logging", EnableTicketLossRateLogging.GetType(), EnableTicketLossRateLogging));
         
         lstReturn.Add(new CPluginVariable("1 - Settings|Enable Whitelisting Of Reserved Slots List", EnableWhitelistingOfReservedSlotsList.GetType(), EnableWhitelistingOfReservedSlotsList));
 
@@ -2359,14 +2357,6 @@ public void SetPluginVariable(String strVariable, String strValue) {
         if (!String.IsNullOrEmpty(ShowCommandInLog)) {
             CommandToLog(ShowCommandInLog);
             ShowCommandInLog = String.Empty;
-        }
-
-        // Handle risky settings
-        if (!EnableRiskyFeatures) {
-            if (EnableTicketLossRateLogging) {
-                ConsoleWarn("^8Setting ^bEnable Ticket Loss Rate Logging^n to False. This is an experimental setting and you have not enabled risky settings.");
-                EnableTicketLossRateLogging = false;
-            }
         }
     }
 }
@@ -5335,6 +5325,22 @@ private void BalanceAndUnstack(String name) {
             }
         }
 
+        //If target team winning, and target team losing tickets slower, don't disperse to target team
+        if (toTeam != player.Team && toTeam > 0 && player.Team > 0)
+        {
+            if ((fTickets[toTeam] > fTickets[player.Team] && Math.Abs(GetAverageTicketLossRate(toTeam, false)) < Math.Abs(GetAverageTicketLossRate(player.Team, false)) && fTickets[toTeam] - fTickets[player.Team] > 50)
+                ||
+                (GetAverageTicketLossRate(toTeam, false) == 0 && GetAverageTicketLossRate(player.Team, false) == 0 && fTickets[toTeam] - fTickets[player.Team] > 200)
+                ||
+                fTickets[toTeam] - fTickets[player.Team] > 300)
+            {
+                DebugBalance("Exempting ^b" + name + "^n, target team is already strong.");
+                ConsoleWarn("Exempting ^b" + name + "^n, target team is already strong.");
+                //Perhaps remove the increment and exempt rounds
+                return;
+            }
+        }
+
         /* Move for balance */
 
         int origTeam = player.Team;
@@ -6415,7 +6421,7 @@ private bool CheckTeamSwitch(String name, int toTeam) {
             CheckAbortMove(name);
             return true;
         }
-    } else if (toTeam == winningTeam) {
+    } else if (toTeam == winningTeam || Math.Abs(GetAverageTicketLossRate(toTeam, false)) < Math.Abs(GetAverageTicketLossRate(player.Team, false))) {
         why = ForbidBecause.ToWinning;
         if (!Forbid(perMode, ForbidSwitchingToWinningTeam)) {
             DebugUnswitch("ALLOWED: move by ^b" + name + "^n because ^bForbid Switch To Winning Team^n is False");
