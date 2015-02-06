@@ -1,7 +1,6 @@
 ﻿/* MULTIbalancer.cs
 
 Copyright 2013, by PapaCharlie9
-`   
 Permission is hereby granted, free of charge, to any person or organization
 obtaining a copy of the software and accompanying documentation covered by
 this license (the "Software") to use, reproduce, display, distribute,
@@ -26,11 +25,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Collections;
 using System.Net;
-using System.Web;
-using System.Data;
 using System.Threading;
-using System.Timers;
-using System.Diagnostics;
 using System.ComponentModel;
 using System.Reflection;
 using System.Xml;
@@ -40,9 +35,6 @@ using PRoCon.Core;
 using PRoCon.Core.Plugin;
 using PRoCon.Core.Plugin.Commands;
 using PRoCon.Core.Players;
-using PRoCon.Core.Players.Items;
-using PRoCon.Core.Battlemap;
-using PRoCon.Core.Maps;
 
 
 namespace PRoConEvents
@@ -1676,7 +1668,7 @@ public String GetPluginName() {
 }
 
 public String GetPluginVersion() {
-    return "1.1.4.0";
+    return "1.1.4.1";
 }
 
 public String GetPluginAuthor() {
