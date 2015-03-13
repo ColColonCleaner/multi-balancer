@@ -1,4 +1,6 @@
-﻿/* MULTIbalancer.cs
+/* 
+
+MULTIbalancer.cs
 
 Copyright 2013, by PapaCharlie9
 Permission is hereby granted, free of charge, to any person or organization
@@ -2361,7 +2363,7 @@ procon.protected.plugins.setVariable "MULTIbalancer" "1 - Settings|Friends List"
 procon.protected.plugins.setVariable "MULTIbalancer" "1 - Settings|Disperse Evenly List" "1 AAA BBB CCC|2 XXX YYY ZZZ|Able|Baker|Charlie|Delta"
 
 Command: 	procon.protected.plugins.setVariable <string: classname> <string: variablename> <string: value>
-Effect: 	Sets <classname> plugin’s <variablename> to <value>
+Effect: 	Sets <classname> plugin's <variablename> to <value>
 
 */
 
