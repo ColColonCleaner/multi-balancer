@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Collections;
 using System.Net;
+using System.Linq;
 using System.Threading;
 using System.ComponentModel;
 using System.Reflection;
@@ -1015,6 +1016,8 @@ private int fRageQuits = 0;
 private int fPlayerCount = 0;
 private int fBF4CommanderCount = 0;
 private int fBF4SpectatorCount = 0;
+private DateTime _lastBattlelogFrequencyMessage = DateTime.UtcNow - TimeSpan.FromSeconds(5);
+private Queue<DateTime> _BattlelogActionTimes = new Queue<DateTime>();
 
 // Settings support
 private Dictionary<int, Type> fEasyTypeDict = null;
@@ -9137,6 +9140,20 @@ public void FetchLoop() {
     }
 }
 
+private void LogBattlelogFrequency() {
+    lock (_BattlelogActionTimes) {
+        _BattlelogActionTimes.Enqueue(DateTime.UtcNow);
+        while (_BattlelogActionTimes.Count() > 1000) {
+            _BattlelogActionTimes.Dequeue();
+        }
+        if (_BattlelogActionTimes.Any() && (DateTime.UtcNow - _lastBattlelogFrequencyMessage).Duration().TotalSeconds > 30) {
+            var frequency = Math.Round(_BattlelogActionTimes.Count(time => (DateTime.UtcNow - time).Duration().TotalMinutes <= 2) / 2.0, 2);
+            ConsoleWrite("^bInfo:^n Average battlelog request frequency: " + frequency + " r/m", 0);
+            _lastBattlelogFrequencyMessage = DateTime.UtcNow;
+        }
+    }
+}
+
 private void SendBattlelogRequest(String name, String requestType, PlayerModel player) {
     try {
         String result = String.Empty;
@@ -9155,6 +9172,7 @@ private void SendBattlelogRequest(String name, String requestType, PlayerModel p
             bool ok = false;
             status.State = FetchState.Failed;
             if (!fIsEnabled) return;
+            LogBattlelogFrequency();
             ok = FetchWebPage(ref result, "http://battlelog.battlefield.com/bf3/user/" + name);
             if (!fIsEnabled) return;
 
@@ -9196,6 +9214,7 @@ private void SendBattlelogRequest(String name, String requestType, PlayerModel p
             status.State = FetchState.Failed;
             if (!fIsEnabled || WhichBattlelogStats == BattlelogStats.ClanTagOnly) return;
             String furl = "http://battlelog.battlefield.com/bf3/overviewPopulateStats/" + player.PersonaId + "/bf3-us-assault/1/";
+            LogBattlelogFrequency();
             if (FetchWebPage(ref result, furl)) {
                 if (!fIsEnabled) return;
 
@@ -9249,6 +9268,7 @@ private void SendBattlelogRequestBF4(String name, String requestType, PlayerMode
             bool ok = false;
             status.State = FetchState.Failed;
             if (!fIsEnabled) return;
+            LogBattlelogFrequency();
             ok = FetchWebPage(ref result, "http://battlelog.battlefield.com/bf4/user/" + name);
             if (!fIsEnabled) return;
 
@@ -9277,6 +9297,7 @@ private void SendBattlelogRequestBF4(String name, String requestType, PlayerMode
             status.State = FetchState.Failed;
             if (!fIsEnabled) return;
             String bf4furl = "http://battlelog.battlefield.com/bf4/warsawoverviewpopulate/" + player.PersonaId + "/1/";
+            LogBattlelogFrequency();
             ok = FetchWebPage(ref result, bf4furl);
             if (!fIsEnabled) return;
             if (!ok) return;
@@ -9328,6 +9349,7 @@ private void SendBattlelogRequestBF4(String name, String requestType, PlayerMode
             status.State = FetchState.Failed;
             if (!fIsEnabled || WhichBattlelogStats == BattlelogStats.ClanTagOnly) return;
             String furl = "http://battlelog.battlefield.com/bf4/warsawoverviewpopulate/" + player.PersonaId + "/1/";
+            LogBattlelogFrequency();
             if (FetchWebPage(ref result, furl)) {
                 if (!fIsEnabled) return;
 
