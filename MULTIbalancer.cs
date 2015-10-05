@@ -9143,11 +9143,11 @@ public void FetchLoop() {
 private void LogBattlelogFrequency() {
     lock (_BattlelogActionTimes) {
         _BattlelogActionTimes.Enqueue(DateTime.UtcNow);
-        while (_BattlelogActionTimes.Count() > 1000) {
+        while ((DateTime.UtcNow - _BattlelogActionTimes.Peek()).Duration().TotalMinutes > 5) {
             _BattlelogActionTimes.Dequeue();
         }
         if (_BattlelogActionTimes.Any() && (DateTime.UtcNow - _lastBattlelogFrequencyMessage).Duration().TotalSeconds > 30) {
-            var frequency = Math.Round(_BattlelogActionTimes.Count(time => (DateTime.UtcNow - time).Duration().TotalMinutes <= 2) / 2.0, 2);
+            var frequency = Math.Round(_BattlelogActionTimes.Count() / (DateTime.UtcNow - _BattlelogActionTimes.Peek()).Duration().TotalMinutes, 2);
             ConsoleWrite("^bInfo:^n Average battlelog request frequency: " + frequency + " r/m", 0);
             _lastBattlelogFrequencyMessage = DateTime.UtcNow;
         }
