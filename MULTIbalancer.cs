@@ -1673,7 +1673,7 @@ public String GetPluginName() {
 }
 
 public String GetPluginVersion() {
-    return "1.1.4.1";
+    return "1.1.4.2";
 }
 
 public String GetPluginAuthor() {
@@ -11322,7 +11322,7 @@ private void DebugFetch(String msg, int level) {
 private void DebugScrambler(String msg) {
     String prefix = String.Empty;
     if (Thread.CurrentThread.Name == null || Thread.CurrentThread.Name != "scrambler") prefix = "^5(SCRAMBLER)";
-    DebugWrite(prefix + " ^9" + msg, 6);
+    DebugWrite(prefix + " ^9" + msg, 2);
 }
 
 
